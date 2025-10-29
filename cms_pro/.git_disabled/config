@@ -1,0 +1,10 @@
+[core]
+	repositoryformatversion = 0
+	filemode = false
+	bare = false
+	logallrefupdates = true
+	symlinks = false
+	ignorecase = true
+[remote "backup"]
+	url = https://github.com/Pradeep-007-hash/cms.git
+	fetch = +refs/heads/*:refs/remotes/backup/*

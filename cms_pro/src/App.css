@@ -1,0 +1,96 @@
+
+
+/* General Body Styling */
+body {
+  font-family: Arial, sans-serif;
+  background: #f2f4f8;
+  margin: 0;
+  padding: 0;
+  justify-content: center;
+  
+}
+
+/* Form Container */
+.container {
+  width: 400px;
+  margin: 50px auto;
+  background: #f4e915;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 0 15px rgb(255, 252, 252);
+}
+
+/* Form Title */
+h2 {
+  text-align: center;
+  color: #333333;
+  margin-bottom: 15px;
+}
+
+/* Labels */
+label {
+  font-weight: bold;
+  display: block;
+  margin-top: 10px;
+  color: #000000;
+  
+}
+
+/* Inputs & Select Fields */
+input, select {
+  width: 100%;
+  padding: 8px;
+  margin-top: 5px;
+  border: 1px solid #ff0c0c;
+  border-radius: 5px;
+  font-size: 14px;
+  box-sizing: border-box;
+  transition: border-color 0.3s ease;
+  color: #000000;
+}
+
+/* Input Focus Effect */
+input:focus, select:focus {
+  border-color: #007BFF;
+  outline: none;
+}
+
+/* File Input Styling */
+input[type="file"] {
+  padding: 5px;
+  border: none;
+}
+
+/* Checkbox Container */
+.checkbox input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+}
+
+/* Button Styling */
+button {
+  width: 100%;
+  padding: 10px;
+  background: #22ff00;
+  border: none;
+  color: white;
+  font-size: 16px;
+  font-weight: bold;
+  border-radius: 5px;
+  margin-top: 15px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+/* Button Hover Effect */
+button:hover {
+  background: #18b300;
+}
+
+/* Responsive Form for Mobile */
+@media screen and (max-width: 450px) {
+  .container {
+    width: 90%;
+    padding: 15px;
+  }
+}
