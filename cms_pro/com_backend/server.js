@@ -1,6 +1,7 @@
 import express, { json } from "express";
 import cors from "cors";
 import bodyParser from "body-parser";
+import dotenv from "dotenv";
 import { MongoClient, ObjectId } from "mongodb";
 import bcrypt from "bcryptjs";
 import multer from "multer";
@@ -10,6 +11,8 @@ import passport from "passport";
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 import session from "express-session";
 import { sendNotification } from "./notification.js";
+
+dotenv.config();
 
 const { hash, compare } = bcrypt;
 const { memoryStorage } = multer;
@@ -98,22 +101,23 @@ app.get('/auth/google',
   passport.authenticate('google', { scope: ['profile', 'email'] }));
 
 app.get('/auth/google/callback',
-  passport.authenticate('google', { failureRedirect: '/login' }),
+  passport.authenticate('google', { failureRedirect: 'http://localhost:5173/Login?error=oauth_failed' }),
   async (req, res) => {
-    // Successful authentication, return user data as JSON for frontend
+    // Successful authentication, redirect to frontend with user data
     const user = req.user;
-    res.json({
-      message: "Google login successful",
-      user: {
-        id: user._id.toString(),
-        firstname: user.firstname,
-        lastname: user.lastname,
-        email: user.email,
-        role: user.role,
-        status: user.status,
-        image: user.image || null,
-      },
-    });
+    const userData = {
+      id: user._id.toString(),
+      firstname: user.firstname,
+      lastname: user.lastname,
+      email: user.email,
+      role: user.role,
+      status: user.status,
+      image: user.image || null,
+    };
+
+    // Encode user data as base64 to pass in URL
+    const encodedUser = Buffer.from(JSON.stringify(userData)).toString('base64');
+    res.redirect(`http://localhost:5173/Login?oauth_success=true&user=${encodedUser}`);
   });
 
 app.use(json());

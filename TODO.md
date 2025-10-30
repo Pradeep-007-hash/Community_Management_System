@@ -8,10 +8,10 @@
 - [ ] Integrate OAuth with existing session management
 
 ## Frontend Changes
-- [ ] Update Auth.jsx Login component to initiate real Google OAuth
-- [ ] Remove mock OTP flow from Google auth
-- [ ] Integrate OAuth success/failure with AuthContext
-- [ ] Update API calls to handle OAuth responses
+- [x] Update Auth.jsx Login component to initiate real Google OAuth
+- [x] Remove mock OTP flow from Google auth
+- [x] Integrate OAuth success/failure with AuthContext
+- [x] Update API calls to handle OAuth responses
 
 ## Configuration
 - [ ] Obtain Google OAuth Client ID and Secret from Google Console

@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link, useSearchParams } from "react-router-dom";
 import { useAuth } from "./AuthContext";
 
 // API URL constant for the backend service
-const API_URL = "http://localhost:5000"; 
+const API_URL = "http://localhost:5000";
 
 // =================================================================
 // MOCK useFirebase HOOK (Used to resolve compilation error)
@@ -18,9 +18,9 @@ const useFirebase = () => {
         const mockAuthCheck = setTimeout(() => {
             // In a real app, this would get the Firebase user ID.
             // Here, we provide a mock ID for placeholder purposes.
-            setUserId(crypto.randomUUID()); 
+            setUserId(crypto.randomUUID());
             setAuthReady(true);
-        }, 500); 
+        }, 500);
 
         return () => clearTimeout(mockAuthCheck);
     }, []);
@@ -51,18 +51,43 @@ const Login = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
-  // State for the custom Google/OTP flow: 'default', 'email', or 'otp'
-  const [googleFlowStep, setGoogleFlowStep] = useState('default');
-  const [googleEmail, setGoogleEmail] = useState('');
-  const [otp, setOtp] = useState('');
-  // Unified loading state for both password login and OTP flow
   const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
   const { login } = useAuth();
+  const [searchParams] = useSearchParams();
 
   // Get the current user ID and auth status from mock Firebase context
   const { authReady } = useFirebase();
+
+  // Handle OAuth callback on component mount
+  useEffect(() => {
+    const oauthSuccess = searchParams.get('oauth_success');
+    const oauthError = searchParams.get('error');
+    const userParam = searchParams.get('user');
+
+    if (oauthSuccess && userParam) {
+      try {
+        const userData = JSON.parse(Buffer.from(userParam, 'base64').toString());
+        setMessage("Google login successful!");
+        login({ id: userData.id, role: userData.role });
+        setTimeout(() => {
+          if (userData.role === "admin") {
+            navigate("/admin");
+          } else if (userData.role === "security") {
+            navigate("/securitydashboard");
+          } else {
+            navigate("/userdashboard");
+          }
+        }, 500);
+      } catch (err) {
+        console.error("Error parsing OAuth user data:", err);
+        setMessage("Error processing Google login.");
+      }
+    } else if (oauthError) {
+      setMessage("Google login failed. Please try again.");
+    }
+  }, [searchParams, login, navigate]);
 
   // Display a small loading message if Firebase hasn't finished its initial auth check
   if (!authReady) {
@@ -75,83 +100,9 @@ const Login = () => {
     );
   }
 
-
-  // ----------------- REAL OTP HANDLERS (Using fetch to local API) -----------------
-
-  // Handler to switch to the email input step for OTP
+  // Handler for Google OAuth sign in
   const handleGoogleSignIn = () => {
-      setMessage(""); // Clear messages
-      setGoogleFlowStep('email');
-  };
-
-  // Handler for submitting the email (to "generate" OTP)
-  const handleEmailSubmit = async (e) => {
-    e.preventDefault();
-    setMessage("");
-    setLoading(true);
-
-    try {
-        const res = await fetch(`${API_URL}/api/generate-otp`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ email: googleEmail }),
-        });
-
-        const data = await res.json();
-
-        if (data.success) {
-            setMessage(data.message);
-            setGoogleFlowStep('otp'); // Move to OTP verification step
-        } else {
-            setMessage(data.message || "Failed to send OTP. Check your email address.");
-        }
-    } catch (err) {
-        console.error("Generate OTP error:", err);
-        setMessage("Network error. Could not reach the API server.");
-    } finally {
-        setLoading(false);
-    }
-  };
-
-  // Handler for submitting the OTP
-  const handleOTPSubmit = async (e) => {
-    e.preventDefault();
-    setMessage("");
-    setLoading(true);
-
-    try {
-        const res = await fetch(`${API_URL}/api/verify-otp`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ email: googleEmail, otp }),
-        });
-
-        const data = await res.json();
-
-        if (data.success && data.user) {
-            // Successful Login: Save user ID and redirect
-            setMessage("OTP verified. Successfully signed in!");
-            login({ id: data.user.id, role: data.user.role });
-
-            // Redirect based on role after a small delay for better UI feedback
-        setTimeout(() => {
-                if (data.user.role === "admin") {
-                    navigate("/admin");
-                } else if (data.user.role === "security") {
-                    navigate("/securitydashboard");
-                } else {
-                    navigate("/userdashboard");
-                }
-            }, 500);
-        } else {
-            setMessage(data.message || "Invalid OTP. Please try again.");
-        }
-    } catch (err) {
-        console.error("Verify OTP error:", err);
-        setMessage("Network error during OTP verification.");
-    } finally {
-        setLoading(false);
-    }
+    window.location.href = `${API_URL}/auth/google`;
   };
 
   // ----------------- REAL ORIGINAL PASSWORD LOGIN HANDLER (Using fetch to local API) -----------------
@@ -214,13 +165,7 @@ const Login = () => {
     boxShadow: "0 0 5px rgba(25, 118, 210, 0.3)",
   };
 
-  // Helper function for dynamic button styles
-  const dynamicButtonStyle = (baseStyle) => ({
-    ...baseStyle,
-    opacity: loading ? 0.7 : 1,
-    cursor: loading ? "wait" : "pointer",
-    background: loading ? '#ccc' : baseStyle.background,
-  });
+
 
   // ----------------- RENDER -----------------
 
@@ -229,131 +174,71 @@ const Login = () => {
       <div style={cardStyle}>
         <h2 style={titleStyle}>Welcome Back</h2>
         <p style={subtitleStyle}>Please sign in to continue</p>
-        
-        {googleFlowStep === 'default' ? (
-            // --- DEFAULT LOGIN VIEW (Username/Password) ---
-            <>
-              {/* GOOGLE SIGN IN BUTTON (Now initiates OTP flow) */}
-              <button
-                onClick={handleGoogleSignIn}
-                style={googleButtonStyle}
-                onMouseOver={(e) => Object.assign(e.currentTarget.style, googleButtonStyle, googleButtonHoverStyle)}
-                onMouseOut={(e) => Object.assign(e.currentTarget.style, googleButtonStyle)}
-                disabled={loading}
-              >
-                <div style={googleIconContainerStyle}>
-                  <GoogleIcon style={{width: '24px', height: '24px'}} />
-                </div>
-                <div style={googleTextContainerStyle}>
-                  Sign in with Email OTP
-                </div>
-              </button>
-              {/* Separator between Google button and form */}
-              <div style={separatorStyle}>
-                <span style={lineStyle}></span>
-                <span style={{ margin: '0 10px', color: '#888' }}>OR</span>
-                <span style={lineStyle}></span>
-              </div>
 
-              <form onSubmit={handleLogin} style={formStyle}>
-                <label style={labelStyle}>Username</label>
-                <input
-                  type="text"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  required
-                  placeholder="Enter your username"
-                  style={inputBaseStyle}
-                  onFocus={(e) => Object.assign(e.target.style, inputBaseStyle, inputFocusStyle)}
-                  onBlur={(e) => Object.assign(e.target.style, inputBaseStyle)}
-                  disabled={loading}
-                />
+        {/* GOOGLE SIGN IN BUTTON */}
+        <button
+          onClick={handleGoogleSignIn}
+          style={googleButtonStyle}
+          onMouseOver={(e) => Object.assign(e.currentTarget.style, googleButtonStyle, googleButtonHoverStyle)}
+          onMouseOut={(e) => Object.assign(e.currentTarget.style, googleButtonStyle)}
+          disabled={loading}
+        >
+          <div style={googleIconContainerStyle}>
+            <GoogleIcon style={{width: '24px', height: '24px'}} />
+          </div>
+          <div style={googleTextContainerStyle}>
+            Sign in with Google
+          </div>
+        </button>
 
-                <label style={labelStyle}>Password</label>
-                <input
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  placeholder="Enter your password"
-                  style={inputBaseStyle}
-                  onFocus={(e) => Object.assign(e.target.style, inputBaseStyle, inputFocusStyle)}
-                  onBlur={(e) => Object.assign(e.target.style, inputBaseStyle)}
-                  disabled={loading}
-                />
+        {/* Separator between Google button and form */}
+        <div style={separatorStyle}>
+          <span style={lineStyle}></span>
+          <span style={{ margin: '0 10px', color: '#888' }}>OR</span>
+          <span style={lineStyle}></span>
+        </div>
 
-                <button type="submit" style={loading ? { ...buttonStyle, background: '#ccc' } : buttonStyle} disabled={loading}>
-                  {loading && username && password ? 'Signing In...' : 'Sign In'}
-                </button>
-              </form>
-            </>
-        ) : (
-            // --- OTP FLOW VIEW (Email/OTP) ---
-            <>
-              {googleFlowStep === 'email' && (
-                  <form onSubmit={handleEmailSubmit} style={formStyle}>
-                      <label style={labelStyle}>Email for OTP Verification</label>
-                      <input
-                          type="email"
-                          value={googleEmail}
-                          onChange={(e) => setGoogleEmail(e.target.value)}
-                          required
-                          placeholder="Enter your registered email"
-                          style={inputBaseStyle}
-                          onFocus={(e) => Object.assign(e.target.style, inputBaseStyle, inputFocusStyle)}
-                          onBlur={(e) => Object.assign(e.target.style, inputBaseStyle)}
-                          disabled={loading}
-                      />
-                      <button type="submit" style={loading ? { ...buttonStyle, background: '#ccc' } : buttonStyle} disabled={loading}>
-                          {loading ? 'Sending OTP...' : 'Generate OTP'}
-                      </button>
-                      <button type="button" onClick={() => { setGoogleFlowStep('default'); setMessage(''); }} style={{ ...buttonStyle, background: '#ccc', color: '#333', marginTop: '10px' }} disabled={loading}>
-                          Cancel
-                      </button>
-                  </form>
-              )}
+        <form onSubmit={handleLogin} style={formStyle}>
+          <label style={labelStyle}>Username</label>
+          <input
+            type="text"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            required
+            placeholder="Enter your username"
+            style={inputBaseStyle}
+            onFocus={(e) => Object.assign(e.target.style, inputBaseStyle, inputFocusStyle)}
+            onBlur={(e) => Object.assign(e.target.style, inputBaseStyle)}
+            disabled={loading}
+          />
 
-              {googleFlowStep === 'otp' && (
-                  <form onSubmit={handleOTPSubmit} style={formStyle}>
-                      <p style={otpHelperText}>An OTP has been sent to **{googleEmail}**.</p>
-                      <label style={labelStyle}>One-Time Password (OTP)</label>
-                      <input
-                          type="text"
-                          value={otp}
-                          onChange={(e) => setOtp(e.target.value.replace(/[^0-9]/g, ''))}
-                          required
-                          placeholder="Enter 6-digit OTP"
-                          style={inputBaseStyle}
-                          maxLength="6"
-                          onFocus={(e) => Object.assign(e.target.style, inputBaseStyle, inputFocusStyle)}
-                          onBlur={(e) => Object.assign(e.target.style, inputBaseStyle)}
-                          disabled={loading}
-                      />
-                      <button type="submit" style={loading ? { ...buttonStyle, background: '#ccc' } : buttonStyle} disabled={loading}>
-                          {loading ? 'Verifying...' : 'Verify OTP'}
-                      </button>
-                      <button type="button" onClick={() => { setGoogleFlowStep('email'); setMessage(''); setOtp(''); }} style={{ ...buttonStyle, background: '#ccc', color: '#333', marginTop: '10px' }} disabled={loading}>
-                          Back / Resend OTP
-                      </button>
-                  </form>
-              )}
-            </>
-        )}
+          <label style={labelStyle}>Password</label>
+          <input
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+            placeholder="Enter your password"
+            style={inputBaseStyle}
+            onFocus={(e) => Object.assign(e.target.style, inputBaseStyle, inputFocusStyle)}
+            onBlur={(e) => Object.assign(e.target.style, inputBaseStyle)}
+            disabled={loading}
+          />
+
+          <button type="submit" style={loading ? { ...buttonStyle, background: '#ccc' } : buttonStyle} disabled={loading}>
+            {loading && username && password ? 'Signing In...' : 'Sign In'}
+          </button>
+        </form>
 
         {message && <p style={errorStyle}>{message}</p>}
 
-        {/* Signup links only visible in default login view */}
-        {googleFlowStep === 'default' && (
-          <>
-            <p style={signupText}>
-              Don’t have an account?{" "}
-              <Link to="/signup" style={signupLink}>
-                Sign up
-              </Link>
-            </p>
-            <p style={{color:"black", marginTop: '10px'}}><Link to="/forgot-password" style={signupLink}>forget password ?</Link></p>
-          </>
-        )}
+        <p style={signupText}>
+          Don’t have an account?{" "}
+          <Link to="/signup" style={signupLink}>
+            Sign up
+          </Link>
+        </p>
+        <p style={{color:"black", marginTop: '10px'}}><Link to="/forgot-password" style={signupLink}>forget password ?</Link></p>
       </div>
     </div>
   );
@@ -497,12 +382,6 @@ const signupLink = {
   fontWeight: "600",
 };
 
-const otpHelperText = {
-  marginBottom: '15px',
-  fontSize: '14px',
-  color: '#555',
-  textAlign: 'center',
-  lineHeight: '1.4'
-}
+
 
 export default Login;
