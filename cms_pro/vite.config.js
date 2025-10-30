@@ -6,6 +6,6 @@ export default defineConfig({
   plugins: [react()],
   preview: {
     port: 4173,
-    allowedHosts: ['community-management-system-9.onrender.com']
+    allowedHosts: ['community-management-system-5.onrender.com']
   }
 })
