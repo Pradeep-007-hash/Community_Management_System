@@ -1559,6 +1559,11 @@ app.get("/api/notifications/:userId", async (req, res) => {
   }
 });
 
+// ----------------- ROOT ROUTE -----------------
+app.get('/', (req, res) => {
+  res.send('Backend is running');
+});
+
 // ----------------- SERVER START -----------------
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, '0.0.0.0', () => {
