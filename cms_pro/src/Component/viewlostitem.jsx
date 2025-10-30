@@ -84,8 +84,7 @@ const ViewLostItem = () => {
             outline: 'none',
             transition: 'border-color 0.3s',
             backgroundColor: '#fafafa',
-            color:"black",
-            width:"400px"
+            color:"black"
           }}
           onFocus={(e) => e.target.style.borderColor = '#3b5998'}
           onBlur={(e) => e.target.style.borderColor = '#e0e0e0'}

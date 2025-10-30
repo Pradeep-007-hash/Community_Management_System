@@ -116,7 +116,7 @@ function EventView() {
 
 
   // Block rendering until admin and events are loaded
-  if (loading || isAdmin === null) return <p style={{ textAlign: "center", padding: "20px",color:"black",textAlign:"center"}}>Loading events...</p>;
+  if (loading || isAdmin === null) return <p style={{ textAlign: "center", padding: "20px",color:"black"}}>Loading events...</p>;
   if (!events.length) return <p style={{ textAlign: "center", padding: "20px" }}>No upcoming events.</p>;
 
   return (
