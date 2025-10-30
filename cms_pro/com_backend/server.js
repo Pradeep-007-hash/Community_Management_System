@@ -22,8 +22,12 @@ const app = express();
 
 // ----------------- CORS Setup -----------------
 const corsOptions = {
-  origin: "http://localhost:5173", // frontend URL
-  credentials: true,
+  origin: [
+    "http://localhost:5173", // local development
+    "https://meek-meringue-8cdb33.netlify.app", // production frontend URL
+    // Add more production URLs as needed
+  ],
+  credentials: true,
 };
 app.use(cors(corsOptions));
 
@@ -100,7 +104,7 @@ passport.deserializeUser(async (id, done) => {
 app.get('/auth/google',
   passport.authenticate('google', { scope: ['profile', 'email'] }));
 
-app.get('/auth/google/callback',
+app.get('/authttps://meek-meringue-8cdb33.netlify.app/h/google/callback',
   passport.authenticate('google', { failureRedirect: 'http://localhost:5173/Login?error=oauth_failed' }),
   async (req, res) => {
     // Successful authentication, redirect to frontend with user data

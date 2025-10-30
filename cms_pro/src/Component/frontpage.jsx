@@ -27,60 +27,7 @@ const CommunityPortal = () => {
         </div>
       </div>
 
-      {/* Moving Images Section */}
-      <marquee behavior="scroll" direction="left">
-      <div className="moving-images">
-        <img
-          src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRhCd-2u5pG4fseWQ6nCecQfE9oPc5NbY5wPQ&s"
-          alt="Image 1"
-        />
-        <img
-          src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRhCd-2u5pG4fseWQ6nCecQfE9oPc5NbY5wPQ&s"
-          alt="Image 1"
-        />
-        <img
-          src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRhCd-2u5pG4fseWQ6nCecQfE9oPc5NbY5wPQ&s"
-          alt="Image 3"
-        />
-        <img
-          src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRhCd-2u5pG4fseWQ6nCecQfE9oPc5NbY5wPQ&s"
-          alt="Image 4"
-        />
-         <img
-          src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRhCd-2u5pG4fseWQ6nCecQfE9oPc5NbY5wPQ&s"
-          alt="Image 1"
-        />
-        <img
-          src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRhCd-2u5pG4fseWQ6nCecQfE9oPc5NbY5wPQ&s"
-          alt="Image 1"
-        />
-        <img
-          src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRhCd-2u5pG4fseWQ6nCecQfE9oPc5NbY5wPQ&s"
-          alt="Image 1"
-        />
-        <img
-          src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRhCd-2u5pG4fseWQ6nCecQfE9oPc5NbY5wPQ&s"
-          alt="Image 1"
-        />
-        <img
-          src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRhCd-2u5pG4fseWQ6nCecQfE9oPc5NbY5wPQ&s"
-          alt="Image 1"
-        />
-         <img
-          src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRhCd-2u5pG4fseWQ6nCecQfE9oPc5NbY5wPQ&s"
-          alt="Image 1"
-        />
-        <img
-          src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRhCd-2u5pG4fseWQ6nCecQfE9oPc5NbY5wPQ&s"
-          alt="Image 1"
-        />
-        <img
-          src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRhCd-2u5pG4fseWQ6nCecQfE9oPc5NbY5wPQ&s"
-          alt="Image 1"
-        />
       
-      </div>
-      </marquee>
     </div>
   );
 };
