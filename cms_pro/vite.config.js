@@ -5,7 +5,7 @@ import react from '@vitejs/plugin-react'
 export default defineConfig({
   plugins: [react()],
   preview: {
-    port: 4173,
-    allowedHosts: ['community-management-system-5.onrender.com']
+    allowedHosts: ['community-management-system-final-8i2y.onrender.com'],
+    port: process.env.PORT || 4173
   }
 })
